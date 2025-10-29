@@ -1,5 +1,6 @@
 # Aplicativo Conversor de Moedas 
 _Criado com Flutter e Android Studio!_
+
 <img width="603" height="1344" alt="conversor" src="https://github.com/user-attachments/assets/c21f692a-599f-4714-a507-b62f18e21db9" />
 
 ## Arquivos:
