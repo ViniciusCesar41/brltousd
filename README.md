@@ -25,7 +25,7 @@ git clone https://github.com/ViniciusCesar41/brltousd.git
 <img width="607" height="276" alt="cdgit" src="https://github.com/user-attachments/assets/eb4ef359-0ecf-4dda-83b7-767eafe0eb13" />
 
 3. Abra o Android Studio, abra o projeto;
-<img width="540" height="404" alt="openproject" src="https://github.com/user-attachments/assets/c2ba2014-80bc-445e-8b57-30496d7e649d" />
+<img width="434" height="292" alt="openproject" src="https://github.com/user-attachments/assets/be1f1239-91ba-4ba8-98eb-993ef763a7ce" />
 
 4. Crie um dispositivo virtual (Pixel 9 por ex.) ou conecte um dispositivo remoto;
 <img width="473" height="182" alt="virtualdevice" src="https://github.com/user-attachments/assets/d4d05407-af04-44ae-9018-81e88162517f" />
