@@ -71,7 +71,7 @@ class _ConverterFormState extends State<ConverterForm> {
     final rate =
         double.tryParse(_rateController.text.replaceAll(',', '.')) ?? 0.0;
     setState(() {
-      _usd = (rate > 0) ? (brl * rate) : 0.0;
+      _usd = (rate > 0) ? (brl / rate) : 0.0;
     });
   }
 
