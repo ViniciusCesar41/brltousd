@@ -1,5 +1,6 @@
 # Aplicativo Conversor de Moedas 
 _Criado com Flutter e Android Studio!_
+<img width="603" height="1344" alt="conversor" src="https://github.com/user-attachments/assets/c21f692a-599f-4714-a507-b62f18e21db9" />
 
 ## Arquivos:
    - lib/main.dart   -> Código-fonte do app;
@@ -10,18 +11,23 @@ _Criado com Flutter e Android Studio!_
 ### Dependências:
 - [Git](https://git-scm.com/install/);
 - [Flutter SDK](https://docs.flutter.dev/install/manual);
-- [Flutter Plugin for Android Studio/IntelliJ](https://plugins.jetbrains.com/plugin/9212-flutter);
+- [Flutter Plugin para Android Studio/IntelliJ](https://plugins.jetbrains.com/plugin/9212-flutter);
 - [Android Studio](https://developer.android.com/studio).
 
 ### Passo-a-passo:
 1. Instale as dependências -> [tutorial](https://cunhadeveloper.blogspot.com/2024/05/guia-passo-passo-para-usar-o-flutter-no.html)
-2. Abra o terminal e navegue até uma pasta de sua preferência; 
+2. Abra o terminal e navegue até uma pasta de sua preferência;
+<img width="607" height="276" alt="image2" src="https://github.com/user-attachments/assets/eb4ef359-0ecf-4dda-83b7-767eafe0eb13" />
+
 3. Baixe o repositório do projeto;
 ```
 git clone https://github.com/ViniciusCesar41/brltousd.git
 ```
 4. Abra o Android Studio, abra o projeto;
+<img width="429" height="492" alt="image4" src="https://github.com/user-attachments/assets/997e8a5a-7df4-4284-bbce-2a595c9daf4e" />
 5. Crie um dispositivo virtual (Pixel 9 por ex.) ou conecte um dispositivo remoto;
+<img width="473" height="182" alt="image5" src="https://github.com/user-attachments/assets/d4d05407-af04-44ae-9018-81e88162517f" />
 6. Selecionando o dispositivo desejado para rodar o app e depois clique no play;
+<img width="468" height="149" alt="image6" src="https://github.com/user-attachments/assets/201ffc20-63fe-492e-be76-dfaa8df184b1" />
 
 
