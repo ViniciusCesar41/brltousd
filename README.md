@@ -22,15 +22,15 @@ _Criado com Flutter e Android Studio!_
 ```
 git clone https://github.com/ViniciusCesar41/brltousd.git
 ```
-<img width="607" height="276" alt="image2" src="https://github.com/user-attachments/assets/eb4ef359-0ecf-4dda-83b7-767eafe0eb13" />
+<img width="607" height="276" alt="cdgit" src="https://github.com/user-attachments/assets/eb4ef359-0ecf-4dda-83b7-767eafe0eb13" />
 
 3. Abra o Android Studio, abra o projeto;
-<img width="429" height="492" alt="image4" src="https://github.com/user-attachments/assets/997e8a5a-7df4-4284-bbce-2a595c9daf4e" />
+<img width="540" height="404" alt="openproject" src="https://github.com/user-attachments/assets/c2ba2014-80bc-445e-8b57-30496d7e649d" />
 
 4. Crie um dispositivo virtual (Pixel 9 por ex.) ou conecte um dispositivo remoto;
-<img width="473" height="182" alt="image5" src="https://github.com/user-attachments/assets/d4d05407-af04-44ae-9018-81e88162517f" />
+<img width="473" height="182" alt="virtualdevice" src="https://github.com/user-attachments/assets/d4d05407-af04-44ae-9018-81e88162517f" />
 
 5. Selecionando o dispositivo desejado para rodar o app e depois clique no play;
-<img width="468" height="149" alt="image6" src="https://github.com/user-attachments/assets/201ffc20-63fe-492e-be76-dfaa8df184b1" />
+<img width="468" height="149" alt="compileandrun" src="https://github.com/user-attachments/assets/201ffc20-63fe-492e-be76-dfaa8df184b1" />
 
 
