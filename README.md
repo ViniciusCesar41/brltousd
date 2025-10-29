@@ -1,16 +1,24 @@
-# brltosud
+BRL → USD Flutter (minimal)
 
-A new Flutter project.
+Arquivos:
+- lib/main.dart : código-fonte do app
+- pubspec.yaml   : dependências
 
-## Getting Started
+Passo a passo para executar (resumido):
+1) Instale Flutter: https://flutter.dev/docs/get-started/install
+2) No terminal, crie um novo projeto Flutter ou use este:
+   flutter create brl_to_usd_flutter
+3) Substitua o conteúdo de lib/main.dart pelo arquivo fornecido aqui.
+4) Substitua pubspec.yaml pelo fornecido e rode:
+   flutter pub get
+5) Execute em emulador ou dispositivo:
+   flutter run
 
-This project is a starting point for a Flutter application.
+Descrição do app:
+- Insira valor em BRL.
+- Insira cotação (USD por 1 BRL). Exemplo: 0.19
+- Toque em "Converter" para ver o valor em USD.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Observações:
+- Cotação padrão é apenas exemplo. Para cotação real atualizada use uma API externa.
+- Se quiser que eu busque a cotação em tempo real, diga e eu adiciono requisição HTTP.
