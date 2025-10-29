@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 void main() => runApp(BrlToUsdApp());
 
-// main
+// Main
 class BrlToUsdApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -59,6 +59,7 @@ class ConverterForm extends StatefulWidget {
   _ConverterFormState createState() => _ConverterFormState();
 }
 
+// Logica de conversao
 class _ConverterFormState extends State<ConverterForm> {
   final _numberFormat = NumberFormat("#,##0.00", "pt_BR");
   final _brlController = TextEditingController();
