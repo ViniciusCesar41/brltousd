@@ -7,12 +7,11 @@ import 'dart:convert';
 
 void main() => runApp(BrlToUsdApp());
 
-// Main
 class BrlToUsdApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Conversor BRL → USD',
+      title: 'CoinVerter',
       theme: ThemeData(
         textTheme: GoogleFonts.interTightTextTheme(),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
@@ -44,7 +43,7 @@ class BrlToUsdApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Conversor (BRL → USD)'),
+          title: Text('CoinVerter'),
           centerTitle: true,
         ),
         body: Padding(
@@ -61,19 +60,46 @@ class ConverterForm extends StatefulWidget {
   _ConverterFormState createState() => _ConverterFormState();
 }
 
-// Lógica de conversão
 class _ConverterFormState extends State<ConverterForm> {
   final _numberFormat = NumberFormat("#,##0.00", "pt_BR");
   final _brlController = TextEditingController();
   final _rateController = TextEditingController(text: '0');
-  double _usd = 0.0;
+  double _convertedValue = 0.0;
 
   bool _autoRate = true; // true = cotação automática da API
+
+  String _selectedCurrency = 'USD';
+  Map<String, dynamic> _rates = {};
+  final List<String> _currencies = [
+    'USD',
+    'AUD',
+    'BRL',
+    'CAD',
+    'CHF',
+    'CLP',
+    'CNY',
+    'DKK',
+    'EUR',
+    'GBP',
+    'HKD',
+    'INR',
+    'ISK',
+    'JPY',
+    'KRW',
+    'NZD',
+    'PLN',
+    'RUB',
+    'SEK',
+    'SGD',
+    'THB',
+    'TRY',
+    'TWD'
+  ];
 
   @override
   void initState() {
     super.initState();
-    if (_autoRate) fetchDollarRate();
+    if (_autoRate) fetchRates();
   }
 
   @override
@@ -83,21 +109,17 @@ class _ConverterFormState extends State<ConverterForm> {
     super.dispose();
   }
 
-  Future<void> fetchDollarRate() async {
+  Future<void> fetchRates() async {
     try {
-      final response = await http.get(
-        Uri.parse('https://blockchain.info/ticker'),
-      );
+      final response =
+          await http.get(Uri.parse('https://blockchain.info/ticker'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        final brlInBtc = data['BRL']['last'];
-        final usdInBtc = data['USD']['last'];
-        final brlToUsd = brlInBtc / usdInBtc;
-
         setState(() {
-          _rateController.text = brlToUsd.toStringAsFixed(2);
+          _rates = data;
+          _updateRateAndConvert();
         });
       } else {
         throw Exception('Falha ao carregar cotação');
@@ -107,15 +129,85 @@ class _ConverterFormState extends State<ConverterForm> {
     }
   }
 
+  void _updateRateAndConvert() {
+    if (_rates.containsKey('BRL') && _rates.containsKey(_selectedCurrency)) {
+      final brlPerBtc = _rates['BRL']['last'] as num;
+      final targetPerBtc = _rates[_selectedCurrency]['last'] as num;
+
+      // Cotação da moeda selecionada em BRL
+      final fiatInBrl = brlPerBtc / targetPerBtc;
+
+      _rateController.text = fiatInBrl.toStringAsFixed(2);
+      _convert();
+    }
+  }
+
   void _convert() {
     final brl =
         double.tryParse(_brlController.text.replaceAll(',', '.')) ?? 0.0;
     final rate =
-        double.tryParse(_rateController.text.replaceAll(',', '.')) ?? 0.0;
+        double.tryParse(_rateController.text.replaceAll(',', '.')) ?? 1.0;
 
     setState(() {
-      _usd = (rate > 0) ? (brl * rate) : 0.0;
+      _convertedValue = brl / rate; // BRL ÷ BRL por moeda = valor na moeda
     });
+  }
+
+  void _openCurrencySelector() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String search = '';
+        List<String> filtered = _currencies;
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text('Escolha a moeda'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: 'Pesquisar moeda',
+                    ),
+                    onChanged: (value) {
+                      setStateDialog(() {
+                        search = value.toUpperCase();
+                        filtered = _currencies
+                            .where((c) => c.contains(search))
+                            .toList();
+                      });
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    width: double.maxFinite,
+                    height: 200,
+                    child: ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final currency = filtered[index];
+                        return ListTile(
+                          title: Text(currency),
+                          onTap: () {
+                            setState(() {
+                              _selectedCurrency = currency;
+                              _updateRateAndConvert();
+                            });
+                            Navigator.of(context).pop();
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -123,33 +215,28 @@ class _ConverterFormState extends State<ConverterForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Botão toggle
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text(
-              _autoRate ? 'Cotação automática' : 'Cotação manual',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text('Cotação automática'),
             ),
-            SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () {
+            Switch(
+              value: _autoRate,
+              onChanged: (value) {
                 setState(() {
-                  _autoRate = !_autoRate;
-                  if (_autoRate) fetchDollarRate();
+                  _autoRate = value;
+                  if (_autoRate) fetchRates();
                 });
               },
-              child: Icon(Icons.refresh),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _autoRate ? Colors.green : Colors.grey,
-                minimumSize: Size(40, 40),
-                padding: EdgeInsets.zero,
-              ),
+            ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: _openCurrencySelector,
+              child: Text(_selectedCurrency),
             ),
           ],
         ),
         SizedBox(height: 16),
-
         TextField(
           controller: _brlController,
           keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -160,29 +247,29 @@ class _ConverterFormState extends State<ConverterForm> {
             labelText: 'Valor em BRL',
             prefixText: 'R\$ ',
           ),
+          onChanged: (_) => _convert(),
         ),
         SizedBox(height: 16),
-
         TextField(
           controller: _rateController,
-          readOnly: _autoRate, // desativa edição se automático
+          readOnly: _autoRate,
           keyboardType: TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
           ],
           decoration: InputDecoration(
-            labelText: 'Cotação (USD por 1 BRL)',
+            labelText: 'Cotação ($_selectedCurrency por 1 BRL)',
             hintText: 'ex: 0.19',
             suffixIcon: _autoRate
                 ? IconButton(
                     icon: Icon(Icons.refresh),
-                    onPressed: fetchDollarRate,
+                    onPressed: fetchRates,
                   )
                 : null,
           ),
+          onChanged: (_) => _convert(),
         ),
         SizedBox(height: 24),
-
         ElevatedButton(
           onPressed: _convert,
           child: Text('Converter'),
@@ -195,7 +282,7 @@ class _ConverterFormState extends State<ConverterForm> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            'Resultado: \$${_numberFormat.format(_usd)}',
+            'Resultado: ${_selectedCurrency == "BRL" ? "R\$" : "\$"}${_numberFormat.format(_convertedValue)}',
             textAlign: TextAlign.center,
             style: GoogleFonts.interTight(
               fontSize: 22,
