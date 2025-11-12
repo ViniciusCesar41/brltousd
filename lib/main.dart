@@ -66,7 +66,8 @@ class _ConverterFormState extends State<ConverterForm> {
   final _rateController = TextEditingController(text: '0');
   double _convertedValue = 0.0;
 
-  bool _autoRate = true; // true = cotação automática da API
+  bool _autoRate =
+      true; // se true, pega a cotação direto da API pq preguiça de digitar
 
   String _selectedCurrency = 'USD';
   Map<String, dynamic> _rates = {};
@@ -99,66 +100,70 @@ class _ConverterFormState extends State<ConverterForm> {
   @override
   void initState() {
     super.initState();
-    if (_autoRate) fetchRates();
+    if (_autoRate)
+      fetchRates(); // se tiver modo automático, já puxa a cotação assim que abre
   }
 
   @override
   void dispose() {
-    _brlController.dispose();
+    _brlController.dispose(); // limpando bagunça dos controllers
     _rateController.dispose();
     super.dispose();
   }
 
   Future<void> fetchRates() async {
     try {
-      final response =
-          await http.get(Uri.parse('https://blockchain.info/ticker'));
+      final response = await http.get(Uri.parse(
+          'https://blockchain.info/ticker')); // chama a API do blockchain.info
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
         setState(() {
-          _rates = data;
-          _updateRateAndConvert();
+          _rates = data; // jogando tudo no state pra usar depois
+          _updateRateAndConvert(); // atualiza o rate e converte na hora
         });
       } else {
-        throw Exception('Falha ao carregar cotação');
+        throw Exception('Falha ao carregar cotação'); // deu ruim, mostra isso
       }
     } catch (e) {
-      print('Erro ao buscar cotação: $e');
+      print('Erro ao buscar cotação: $e'); // debug, só pra ver oq rolou
     }
   }
 
   void _updateRateAndConvert() {
+    // só atualiza se tiver as moedas no mapa, pq se não da ruim
     if (_rates.containsKey('BRL') && _rates.containsKey(_selectedCurrency)) {
       final brlPerBtc = _rates['BRL']['last'] as num;
       final targetPerBtc = _rates[_selectedCurrency]['last'] as num;
 
-      // Cotação da moeda selecionada em BRL
+      // calcula a cotação da moeda selecionada em BRL
       final fiatInBrl = brlPerBtc / targetPerBtc;
 
-      _rateController.text = fiatInBrl.toStringAsFixed(2);
-      _convert();
+      _rateController.text = fiatInBrl.toStringAsFixed(2); // joga no textfield
+      _convert(); // já converte logo depois
     }
   }
 
   void _convert() {
+    // tenta pegar o valor do BRL e da cotação, se não der usa 0 ou 1
     final brl =
         double.tryParse(_brlController.text.replaceAll(',', '.')) ?? 0.0;
     final rate =
         double.tryParse(_rateController.text.replaceAll(',', '.')) ?? 1.0;
 
     setState(() {
-      _convertedValue = brl / rate; // BRL ÷ BRL por moeda = valor na moeda
+      _convertedValue = brl / rate; // BRL ÷ cotação = valor na moeda
     });
   }
 
   void _openCurrencySelector() {
+    // abre o modal pra escolher a moeda
     showDialog(
       context: context,
       builder: (context) {
-        String search = '';
-        List<String> filtered = _currencies;
+        String search = ''; // pesquisa do usuário
+        List<String> filtered = _currencies; // lista filtrada
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
@@ -176,7 +181,7 @@ class _ConverterFormState extends State<ConverterForm> {
                         search = value.toUpperCase();
                         filtered = _currencies
                             .where((c) => c.contains(search))
-                            .toList();
+                            .toList(); // filtra conforme digita
                       });
                     },
                   ),
@@ -192,10 +197,10 @@ class _ConverterFormState extends State<ConverterForm> {
                           title: Text(currency),
                           onTap: () {
                             setState(() {
-                              _selectedCurrency = currency;
-                              _updateRateAndConvert();
+                              _selectedCurrency = currency; // muda moeda
+                              _updateRateAndConvert(); // atualiza cotação
                             });
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(); // fecha modal
                           },
                         );
                       },
@@ -218,21 +223,22 @@ class _ConverterFormState extends State<ConverterForm> {
         Row(
           children: [
             Expanded(
-              child: Text('Cotação automática'),
+              child: Text('Cotação automática'), // label do switch
             ),
             Switch(
               value: _autoRate,
               onChanged: (value) {
                 setState(() {
                   _autoRate = value;
-                  if (_autoRate) fetchRates();
+                  if (_autoRate)
+                    fetchRates(); // se liga, se ligar o automático já puxa a cotação
                 });
               },
             ),
             SizedBox(width: 10),
             ElevatedButton(
               onPressed: _openCurrencySelector,
-              child: Text(_selectedCurrency),
+              child: Text(_selectedCurrency), // mostra a moeda selecionada
             ),
           ],
         ),
@@ -241,18 +247,20 @@ class _ConverterFormState extends State<ConverterForm> {
           controller: _brlController,
           keyboardType: TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+            FilteringTextInputFormatter.allow(
+                RegExp(r'[\d.,]')), // só deixa digitar número e vírgula/ponto
           ],
           decoration: InputDecoration(
             labelText: 'Valor em BRL',
             prefixText: 'R\$ ',
           ),
-          onChanged: (_) => _convert(),
+          onChanged: (_) => _convert(), // já converte na hora que digita
         ),
         SizedBox(height: 16),
         TextField(
           controller: _rateController,
-          readOnly: _autoRate,
+          readOnly:
+              _autoRate, // se estiver no modo automático não deixa digitar
           keyboardType: TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
@@ -263,7 +271,8 @@ class _ConverterFormState extends State<ConverterForm> {
             suffixIcon: _autoRate
                 ? IconButton(
                     icon: Icon(Icons.refresh),
-                    onPressed: fetchRates,
+                    onPressed:
+                        fetchRates, // botão pra atualizar cotação manualmente
                   )
                 : null,
           ),
@@ -272,7 +281,7 @@ class _ConverterFormState extends State<ConverterForm> {
         SizedBox(height: 24),
         ElevatedButton(
           onPressed: _convert,
-          child: Text('Converter'),
+          child: Text('Converter'), // botão manual de converter
         ),
         SizedBox(height: 24),
         Container(
