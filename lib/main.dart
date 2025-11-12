@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() => runApp(BrlToUsdApp());
 
@@ -59,21 +61,19 @@ class ConverterForm extends StatefulWidget {
   _ConverterFormState createState() => _ConverterFormState();
 }
 
-// Logica de conversao
+// Lógica de conversão
 class _ConverterFormState extends State<ConverterForm> {
   final _numberFormat = NumberFormat("#,##0.00", "pt_BR");
   final _brlController = TextEditingController();
-  final _rateController = TextEditingController(text: '5.3');
+  final _rateController = TextEditingController(text: '0');
   double _usd = 0.0;
 
-  void _convert() {
-    final brl =
-        double.tryParse(_brlController.text.replaceAll(',', '.')) ?? 0.0;
-    final rate =
-        double.tryParse(_rateController.text.replaceAll(',', '.')) ?? 0.0;
-    setState(() {
-      _usd = (rate > 0) ? (brl / rate) : 0.0;
-    });
+  bool _autoRate = true; // true = cotação automática da API
+
+  @override
+  void initState() {
+    super.initState();
+    if (_autoRate) fetchDollarRate();
   }
 
   @override
@@ -83,12 +83,73 @@ class _ConverterFormState extends State<ConverterForm> {
     super.dispose();
   }
 
-  // Resultado
+  Future<void> fetchDollarRate() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://blockchain.info/ticker'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        final brlInBtc = data['BRL']['last'];
+        final usdInBtc = data['USD']['last'];
+        final brlToUsd = brlInBtc / usdInBtc;
+
+        setState(() {
+          _rateController.text = brlToUsd.toStringAsFixed(2);
+        });
+      } else {
+        throw Exception('Falha ao carregar cotação');
+      }
+    } catch (e) {
+      print('Erro ao buscar cotação: $e');
+    }
+  }
+
+  void _convert() {
+    final brl =
+        double.tryParse(_brlController.text.replaceAll(',', '.')) ?? 0.0;
+    final rate =
+        double.tryParse(_rateController.text.replaceAll(',', '.')) ?? 0.0;
+
+    setState(() {
+      _usd = (rate > 0) ? (brl * rate) : 0.0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Botão toggle
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              _autoRate ? 'Cotação automática' : 'Cotação manual',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _autoRate = !_autoRate;
+                  if (_autoRate) fetchDollarRate();
+                });
+              },
+              child: Icon(Icons.refresh),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _autoRate ? Colors.green : Colors.grey,
+                minimumSize: Size(40, 40),
+                padding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+
         TextField(
           controller: _brlController,
           keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -101,18 +162,27 @@ class _ConverterFormState extends State<ConverterForm> {
           ),
         ),
         SizedBox(height: 16),
+
         TextField(
           controller: _rateController,
+          readOnly: _autoRate, // desativa edição se automático
           keyboardType: TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
           ],
           decoration: InputDecoration(
             labelText: 'Cotação (USD por 1 BRL)',
-            hintText: 'ex: 5.5',
+            hintText: 'ex: 0.19',
+            suffixIcon: _autoRate
+                ? IconButton(
+                    icon: Icon(Icons.refresh),
+                    onPressed: fetchDollarRate,
+                  )
+                : null,
           ),
         ),
         SizedBox(height: 24),
+
         ElevatedButton(
           onPressed: _convert,
           child: Text('Converter'),
